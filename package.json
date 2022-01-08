@@ -1,0 +1,11 @@
+{
+  "name": "imboard",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:benalittlewhile/iMboard.git",
+  "author": "ben <isieldor@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "fullstart": "idk, fix this later or somethin"
+  }
+}
