@@ -3,10 +3,13 @@ import path from "path";
 
 const app = express();
 
-// app.get("/favicon.ico", (req, res) => res.status(204));
-app.use(express.static(path.join(__dirname, "/public")));
-
 const validIds = [0, 1, 69, 8, 24, 305];
+
+app.get("/", (req, res) => {
+  res.send("not for you");
+});
+
+app.use(express.static(path.join(__dirname, "/public")));
 
 app.get("/:id", (req, res) => {
   if (validIds.includes(Number(req.params.id))) {

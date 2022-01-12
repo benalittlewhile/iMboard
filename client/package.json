@@ -16,8 +16,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "move": "cp -r build/* ../server/build/",
-    "deploy": "yarn build && mkdir -p ../server/build && rm -rf ../server/build/* && yarn move"
+    "move": "cp -r build/* ../server/build/public/",
+    "deploy": "yarn build && mkdir -p ../server/build/public && rm -rf ../server/build/public/* && yarn move"
   },
   "eslintConfig": {
     "extends": [
