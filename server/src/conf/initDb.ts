@@ -1,3 +1,4 @@
+import path from "path/posix";
 import { exit } from "process";
 import sqlite3, { Database } from "sqlite3";
 import { usesRow } from "../demo/dbTest";
@@ -35,16 +36,17 @@ export default function initDb() {
 }
 
 export function initBlankDb() {
-  const db = new sqlite3.Database("./db/storage.db", (error) => {
+  console.log(getDbPath());
+  const db = new sqlite3.Database(getDbPath(), (error) => {
     if (error) {
       console.error(error);
       console.error("Error while opening database, exiting");
       exit();
     }
-    console.log("loaded ../db/storage.db");
+    console.log("loaded /db/storage.db");
   });
 
-  db.run(`DROP TABLE uses`, (err) => {
+  db.run(`DROP TABLE IF EXISTS uses`, (err) => {
     if (err) {
       console.log("error clearing uses in initBlankDb");
       console.error(err);
@@ -99,4 +101,9 @@ export function testInsert(db: Database) {
         });
     }
   );
+}
+
+function getDbPath(): string {
+  const initialPath = __dirname.split("build/")[0];
+  return path.join(initialPath, "db", "storage.db");
 }
