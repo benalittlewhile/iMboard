@@ -39,8 +39,18 @@ login?:
 */
 
 /*
+write
+@methods: GET
+@params:
+    hash:
+        string
+        unique id
+
+*/
+
+/*
 writeMessage:
-@methods: POST/GET
+@methods: POST
 @params:
   hash:
     string 
@@ -48,7 +58,7 @@ writeMessage:
 @returns
 response code
   good if the hash is valid and the db call worked (then client moves on to the
-  message list)
+  message list via redirect
   bad if the hash is invalid or the db call fails
 
 */
@@ -70,12 +80,21 @@ app.use(express.static(path.join(__dirname, "/public")));
 
 app.get("/:id", (req, res) => {
   if (validIds.includes(Number(req.params.id))) {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.redirect(`/${req.params.id}/write`);
   } else {
     res.send("not for you");
   }
-  console.log(`Login from ${req.params.id}`);
+  console.log(`Login from ${req.params.id} on /:id`);
 });
+
+app.get("/:id/write", (req, res) => {
+ if (validIds.includes(Number(req.params.id))) {
+   res.sendFile(path.join(__dirname, "public", "index.html"));
+ } else {
+   res.send("not for you");
+ }
+ console.log(`Login from ${req.params.id} on /write`);
+})
 
 app.listen(3000, () => {
   console.log("server listening on 3000");
