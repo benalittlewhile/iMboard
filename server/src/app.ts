@@ -1,7 +1,18 @@
 import express from "express";
 import path from "path";
+import { exit } from "process";
+import sqlite3 from "sqlite3";
+import registerExitHandler from "./conf/exitHandler";
+import initDb, { initBlankDb, testInsert } from "./conf/initDb";
 
 const app = express();
+
+// const db = initDb();
+const db = initBlankDb();
+
+registerExitHandler(db);
+
+testInsert(db);
 
 const validIds = [0, 1, 69, 8, 24, 305];
 
