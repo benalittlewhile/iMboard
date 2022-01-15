@@ -6,13 +6,16 @@
   justify-content: center;
   align-items: center;
   background-color: #373b41;
+  font-family: "Inter", sans-serif;
 }
 
 .input-box {
   aspect-ratio: 4/3;
   max-width: 1200px;
   width: 80%;
+  height: auto;
   max-height: 75%;
+  padding: 0.7%;
 
   border-color: #465192;
   border-style: solid;
@@ -20,8 +23,10 @@
   background-color: inherit;
   color: white;
 
-  font-size: calc( 16px + (24 - 16) * (100vw - 400px) / (800 - 400) );
-  padding: .7%;
+  font-family: inherit;
+  font-size: calc(16px + 8 * (100vw - 400px) / (800 - 400));
+
+  caret-color: #465192;
 
   @media only screen and (max-width: 600px) {
     .input-box {
@@ -31,23 +36,34 @@
 }
 
 textarea::-webkit-resizer {
-  background: linear-gradient( -225deg,transparent 0.755rem,#465192 0) 0;
-  border-bottom-right-radius: 6.5px
+  background: linear-gradient(-225deg, transparent 0.755rem, #465192 0) 0;
+  border-bottom-right-radius: 6.5px;
 }
 
-.input-box:active, .input-box:focus {
+textarea::-webkit-scrollbar-track {
+  background: #373b41;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: #465192;
+  color: #465192;
+  border-radius: 8px;
+}
+
+.input-box:active,
+.input-box:focus {
   outline: none !important;
 }
 
 .submit-button {
   aspect-ratio: 5/2;
-  border-top: 2%;
-  width: 18%;
+  border-top: 3%;
+  width: 25%;
   max-height: 15%;
   margin-top: 2%;
   border-radius: 8px;
   border: none;
-  font-size: 1.45vw;
+  font-size: 3vw;
   background-color: #465192;
   color: white;
 }

@@ -2,17 +2,26 @@ import React from "react";
 import "./writer.css";
 
 function Writer() {
-  let [text, setText] = React.useState("What would you like to leave behind?");
+  const initialText = "What would you like to leave behind?";
+  let [text, setText] = React.useState(initialText);
   let buttonActive = false;
 
   let handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(event?.target?.value);
+    // event.target.style.height = "auto";
+    // event.target.style.height = `${event.target.scrollHeight}px`;
   };
 
-  let handleAreaResize = (event: React.ChangeEvent<HTMLTextAreaElement>) => {};
-
   let handleInputClick = (event: React.MouseEvent<HTMLTextAreaElement>) => {
-    setText("");
+    if (text == initialText) {
+      setText("");
+    }
+  };
+
+  let handleFocusLoss = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (text == "") {
+      setText(initialText);
+    }
   };
 
   let submit = () => {
@@ -26,6 +35,7 @@ function Writer() {
         value={text}
         onChange={handleInputChange}
         onClick={handleInputClick}
+        onBlur={handleFocusLoss}
       />
       <button
         className={`submit-button ${buttonActive ? "button-active" : ""}`}
