@@ -24,7 +24,7 @@
   color: white;
 
   font-family: inherit;
-  font-size: calc(16px + 8 * (100vw - 400px) / (800 - 400));
+  font-size: 1.75vw;
 
   caret-color: #465192;
 
