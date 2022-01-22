@@ -1,13 +1,7 @@
 import { Database } from "sqlite3";
+import { usesRow } from "../types";
 
-export interface usesRow {
-  id: number;
-  hash: string;
-  has_read: boolean;
-  has_written: boolean;
-}
-
-export function testRecords(db: Database) {
+export function testInsert(db: Database) {
   db.run(
     `
       INSERT INTO uses('hash', 'has_read', 'has_written')
@@ -20,17 +14,17 @@ export function testRecords(db: Database) {
       }
     }
   );
-
-  db.run(
+  db.all(
     `
-      SELECT * FROM uses
+      SELECT * FROM uses;
     `,
-    (err: Error, row: usesRow) => {
+    (err: Error, rows: usesRow[]) => {
       if (err) {
         console.error(err);
-      } else {
-        console.log(row.id, row.hash, row.has_read, row.has_written);
-      }
+      } else
+        rows.map((row) => {
+          console.log(row.id, row.hash, row.has_read, row.has_written);
+        });
     }
   );
 }

@@ -6,7 +6,8 @@
   "author": "ben <isieldor@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "fullstart": "nodemon --watch client/src --watch server/src -e ts,json,tsx,css --exec \"clear && yarn --cwd client deploy && yarn --cwd server dorun\""
+    "fullstart": "nodemon --watch client/src --watch server/src -e ts,json,tsx,css --exec \"clear && yarn --cwd client deploy && yarn --cwd server dorun\"",
+    "hash": "yarn --cwd server hash"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
