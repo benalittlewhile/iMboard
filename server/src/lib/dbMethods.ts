@@ -80,3 +80,19 @@ export function addMessage(db: Database, message: string) {
     }
   );
 }
+
+// TODO: try better-sqlite3 so this can be a synchronous implementation
+export function getMessages(db: Database, callback: Function) {
+  db.all(
+    `
+      SELECT * FROM messages;
+    `,
+    (err: Error, rows: { message: string }[]) => {
+      if (err) {
+        console.error(err);
+      } else {
+        callback(rows);
+      }
+    }
+  );
+}

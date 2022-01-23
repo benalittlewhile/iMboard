@@ -3,7 +3,13 @@ import path from "path";
 import { resourceLimits } from "worker_threads";
 import registerExitHandler from "./lib/conf/exitHandler";
 import { initBlankDb } from "./lib/conf/initDb";
-import { addMessage, addRow, findHash, retrieveAllRows } from "./lib/dbMethods";
+import {
+  addMessage,
+  addRow,
+  findHash,
+  getMessages,
+  retrieveAllRows,
+} from "./lib/dbMethods";
 import { testInsert } from "./lib/demo/dbTest";
 import { hash } from "./lib/hash";
 import { usesRow } from "./lib/types";
@@ -142,11 +148,52 @@ app.post("/write", (req, res) => {
             console.log(`[POST/write] verified hash`);
             console.log(`[POST/write] got message body: ${req.body.message}`);
             addMessage(db, req.body.message);
-            res.status(200).redirect(`/read?hash=${hash}`);
+            res.status(200).send();
           }
         });
       } else {
         console.log("[POST/write] rejected hash");
+        res.status(404).send("Invalid request");
+      }
+    });
+  }
+});
+
+app.get("/getMessages", (req, res) => {
+  const hash = req.query.hash as string;
+  if (hash) {
+    console.log(`[GET/getMessages] with hash: ${hash}`);
+    findHash(db, hash, (result: usesRow[]) => {
+      if (result.length != 0) {
+        result.map((row: usesRow) => {
+          if (row.hash === hash) {
+            console.log(`[GET/getMessages] verified hash`);
+            getMessages(db, (rows: usesRow[]) => {
+              res.status(200).send(rows);
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+app.get("/read", (req, res) => {
+  const hash = req.query.hash as string;
+  if (hash) {
+    console.log(`[GET/read] with hash: ${hash}`);
+    findHash(db, hash, (result: usesRow[]) => {
+      if (result.length != 0) {
+        result.map((row: usesRow) => {
+          if (row.hash === hash) {
+            console.log(`[GET/read] verified hash`);
+            res
+              .status(200)
+              .sendFile(path.join(__dirname, "public", "index.html"));
+          }
+        });
+      } else {
+        console.log("[GET/read] rejected hash");
         res.status(404).send("Invalid request");
       }
     });
@@ -167,6 +214,7 @@ app.post("/write", (req, res) => {
   if hash is not valid, either bounce to the error/home page or deny the request
 */
 app.get("/:id", (req, res) => {
+  console.log("wildcard messed you up again");
   findHash(db, req.params.id, (result: usesRow[]) => {
     if (result.length > 0) {
       res.status(200).redirect(`/write?hash=${req.params.id}`);

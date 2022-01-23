@@ -1,11 +1,12 @@
 import React from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import "./writer.css";
 
 function Writer() {
   const initialText = "What would you like to leave behind?";
   const [searchParams, setSearchParams] = useSearchParams();
   const hash = searchParams.get("hash");
+  let navigate = useNavigate();
   let [text, setText] = React.useState(initialText);
   let buttonActive = false;
 
@@ -35,6 +36,9 @@ function Writer() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ message: text }),
+    }).then(() => {
+      navigate(`/read?hash=${hash}`, { replace: true });
+      // navigate(`/read`, { replace: true });
     });
   };
 
