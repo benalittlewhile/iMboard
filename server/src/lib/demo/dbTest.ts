@@ -21,10 +21,18 @@ export function testInsert(db: Database) {
     (err: Error, rows: usesRow[]) => {
       if (err) {
         console.error(err);
-      } else
+      } else {
         rows.map((row) => {
-          console.log(row.id, row.hash, row.has_read, row.has_written);
+          console.log;
+          console.log(
+            "added row:",
+            row.id,
+            row.hash,
+            row.has_read,
+            row.has_written
+          );
         });
+      }
     }
   );
 }

@@ -3,7 +3,7 @@ import path from "path";
 import { resourceLimits } from "worker_threads";
 import registerExitHandler from "./lib/conf/exitHandler";
 import { initBlankDb } from "./lib/conf/initDb";
-import { addRow, findHash, retrieveAllRows } from "./lib/dbMethods";
+import { addMessage, addRow, findHash, retrieveAllRows } from "./lib/dbMethods";
 import { testInsert } from "./lib/demo/dbTest";
 import { hash } from "./lib/hash";
 import { usesRow } from "./lib/types";
@@ -17,6 +17,7 @@ process.argv.map((arg) => {
 });
 
 const app = express();
+app.use(express.json());
 
 // const db = initDb();
 const db = initBlankDb();
@@ -24,8 +25,6 @@ const db = initBlankDb();
 registerExitHandler(db);
 
 testInsert(db);
-
-const validIds = [0, 1, 69, 8, 24, 305];
 
 app.get("/", (req, res) => {
   // TODO: default page
@@ -103,9 +102,53 @@ app.get("/adminRetrieve", (req, res) => {
   if (req.query.adminKey !== adminKey) {
     res.status(404).send(`Invalid request`);
   } else if (req.query.adminKey === adminKey) {
-    const rows = retrieveAllRows(db, (rows: usesRow[]) => {
+    retrieveAllRows(db, (rows: usesRow[]) => {
       console.log(`retrieved rows: ${JSON.stringify(rows)}`);
       res.status(200).json(rows);
+    });
+  }
+});
+
+app.get("/write", (req, res) => {
+  const hash = req.query.hash as string;
+  if (hash) {
+    console.log(`[GET/write] with hash: ${hash}`);
+    findHash(db, hash, (result: usesRow[]) => {
+      if (result.length != 0) {
+        result.map((row: usesRow) => {
+          if (row.hash === hash) {
+            console.log(`[GET/write] verified hash`);
+            res
+              .status(200)
+              .sendFile(path.join(__dirname, "public", "index.html"));
+          }
+        });
+      } else {
+        console.log("[GET/write] rejected hash");
+        res.status(404).send("Invalid request");
+      }
+    });
+  }
+});
+
+app.post("/write", (req, res) => {
+  const hash = req.query.hash as string;
+  if (hash) {
+    console.log(`[POST/write] with hash: ${hash}`);
+    findHash(db, hash, (result: usesRow[]) => {
+      if (result.length != 0) {
+        result.map((row: usesRow) => {
+          if (row.hash === hash) {
+            console.log(`[POST/write] verified hash`);
+            console.log(`[POST/write] got message body: ${req.body.message}`);
+            addMessage(db, req.body.message);
+            res.status(200).redirect(`/read?hash=${hash}`);
+          }
+        });
+      } else {
+        console.log("[POST/write] rejected hash");
+        res.status(404).send("Invalid request");
+      }
     });
   }
 });
@@ -126,28 +169,15 @@ app.get("/adminRetrieve", (req, res) => {
 app.get("/:id", (req, res) => {
   findHash(db, req.params.id, (result: usesRow[]) => {
     if (result.length > 0) {
-      result.map((row: usesRow) => {
-        if (row.hash == req.params.id) {
-          console.log(`Login from ${req.params.id} on /:id`);
-          res.redirect(`/${req.params.id}/write`);
-        }
-      });
+      res.status(200).redirect(`/write?hash=${req.params.id}`);
+    } else {
+      res.send("not for you");
     }
-    res.send("not for you");
     // if (validIds.includes(Number(req.params.id))) {
     // } else {
     //   res.send("not for you");
     // }
   });
-});
-
-app.get("/:id/write", (req, res) => {
-  if (validIds.includes(Number(req.params.id))) {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-  } else {
-    res.send("not for you");
-  }
-  console.log(`Login from ${req.params.id} on /write`);
 });
 
 app.listen(3000, () => {

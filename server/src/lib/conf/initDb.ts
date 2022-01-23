@@ -32,6 +32,24 @@ export default function initDb() {
         }
       }
     );
+
+    db.run(
+      // todo: add date field for messages maybe
+      `
+      CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        body TEXT NOT NULL
+      );
+      `,
+      (err) => {
+        if (err) {
+          console.log("Error creating table messages");
+          console.error(err);
+        } else {
+          console.log("Loaded table messages");
+        }
+      }
+    );
   });
 
   return db;
@@ -48,14 +66,21 @@ export function initBlankDb() {
     console.log("loaded /db/storage.db");
   });
 
-  db.run(`DROP TABLE IF EXISTS uses`, (err) => {
-    if (err) {
-      console.log("error clearing uses in initBlankDb");
-      console.error(err);
-    }
-  });
-
   db.serialize(() => {
+    db.run(`DROP TABLE IF EXISTS uses`, (err) => {
+      if (err) {
+        console.log("error clearing uses in initBlankDb");
+        console.error(err);
+      }
+    });
+
+    db.run(`DROP TABLE IF EXISTS messages`, (err) => {
+      if (err) {
+        console.log("error clearing messages in initBlankDb");
+        console.error(err);
+      }
+    });
+
     db.run(
       `
       CREATE TABLE IF NOT EXISTS uses (
@@ -67,8 +92,28 @@ export function initBlankDb() {
       `,
       (err) => {
         if (err) {
-          console.log("Error creating table");
+          console.log("Error creating table uses");
           console.error(err);
+        } else {
+          console.log("Created table uses");
+        }
+      }
+    );
+
+    db.run(
+      // todo: add date field for messages maybe
+      `
+      CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        body TEXT NOT NULL
+      );
+      `,
+      (err) => {
+        if (err) {
+          console.log("Error creating table messages");
+          console.error(err);
+        } else {
+          console.log("Created table messages");
         }
       }
     );

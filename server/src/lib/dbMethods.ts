@@ -1,4 +1,5 @@
 import { Database } from "sqlite3";
+import { isBuffer } from "util";
 import { usesRow } from "./types";
 
 /*
@@ -50,13 +51,31 @@ export function retrieveAllRows(db: Database, callback: Function) {
 export function findHash(db: Database, hash: string, callback: Function) {
   db.all(
     `
-      SELECT * FROM uses WHERE hash IS ${hash};
+      SELECT * FROM uses WHERE hash = '${hash}';
     `,
     (err: Error, result: usesRow[]) => {
       if (err) {
+        console.error("Error in findHash");
         console.error(err);
       } else {
         callback(result);
+      }
+    }
+  );
+}
+
+export function addMessage(db: Database, message: string) {
+  db.run(
+    `
+      INSERT INTO messages('body')
+      VALUES('${message}');
+    `,
+    (err) => {
+      if (err) {
+        console.error(`[POST/write addm] error adding message to db`);
+        console.error(err);
+      } else {
+        console.log(`[POST/write] added to messages: ${message}`);
       }
     }
   );

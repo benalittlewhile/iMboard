@@ -1,8 +1,11 @@
 import React from "react";
+import { useSearchParams } from "react-router-dom";
 import "./writer.css";
 
 function Writer() {
   const initialText = "What would you like to leave behind?";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const hash = searchParams.get("hash");
   let [text, setText] = React.useState(initialText);
   let buttonActive = false;
 
@@ -25,7 +28,14 @@ function Writer() {
   };
 
   let submit = () => {
-    console.log(text);
+    const url = window.location.href; /*.split("?")[0];*/
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: text }),
+    });
   };
 
   return (
