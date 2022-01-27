@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MessageComponent from "./MessageComponent/MessageComponent";
 import "./reader.css";
+import "./tail.css";
 
 export interface message {
   id: number;
@@ -31,6 +32,7 @@ function Reader() {
   }
 
   async function updateMessages() {
+    console.log("updatemessages");
     const messages = await fetchMessages();
     console.log(`fetched messages ${JSON.stringify(messages)}`);
     setMessages(messages);

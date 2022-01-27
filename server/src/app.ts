@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { resourceLimits } from "worker_threads";
 import registerExitHandler from "./lib/conf/exitHandler";
-import { initBlankDb } from "./lib/conf/initDb";
+import initDb, { initBlankDb } from "./lib/conf/initDb";
 import {
   addMessage,
   addRow,
@@ -25,12 +25,12 @@ process.argv.map((arg) => {
 const app = express();
 app.use(express.json());
 
-// const db = initDb();
-const db = initBlankDb();
+const db = initDb();
+// const db = initBlankDb();
 
 registerExitHandler(db);
 
-testInsert(db);
+// testInsert(db);
 
 app.get("/", (req, res) => {
   // TODO: default page
@@ -81,6 +81,7 @@ adminHashAndAdd
   hash: the hashed value, so I can add it
 */
 app.post("/adminHashAndAdd", (req, res) => {
+  console.log("[POST/adminHashAndAdd]");
   if (req.query.adminKey !== adminKey) {
     res.status(404).send(`Invalid request`);
   } else if (req.query.adminKey === adminKey) {
@@ -105,6 +106,7 @@ adminRetrieve
     a: haha not a good one
 */
 app.get("/adminRetrieve", (req, res) => {
+  console.log("[GET/adminRetrieve]");
   if (req.query.adminKey !== adminKey) {
     res.status(404).send(`Invalid request`);
   } else if (req.query.adminKey === adminKey) {
@@ -116,6 +118,7 @@ app.get("/adminRetrieve", (req, res) => {
 });
 
 app.get("/write", (req, res) => {
+  console.log("[GET/write]");
   const hash = req.query.hash as string;
   if (hash) {
     console.log(`[GET/write] with hash: ${hash}`);
@@ -138,19 +141,20 @@ app.get("/write", (req, res) => {
 });
 
 app.post("/write", (req, res) => {
+  console.log("[POST/write]");
   const hash = req.query.hash as string;
   if (hash) {
     console.log(`[POST/write] with hash: ${hash}`);
     findHash(db, hash, (result: usesRow[]) => {
       if (result.length != 0) {
-        result.map((row: usesRow) => {
-          if (row.hash === hash) {
-            console.log(`[POST/write] verified hash`);
-            console.log(`[POST/write] got message body: ${req.body.message}`);
-            addMessage(db, req.body.message);
-            res.status(200).send();
-          }
-        });
+        const row = result[0];
+        if (row.hash === hash) {
+          console.log(`[POST/write] verified hash`);
+          console.log(`[POST/write] got message body: ${req.body.message}`);
+          addMessage(db, req.body.message);
+          res.status(200).send();
+          return;
+        }
       } else {
         console.log("[POST/write] rejected hash");
         res.status(404).send("Invalid request");
@@ -160,6 +164,7 @@ app.post("/write", (req, res) => {
 });
 
 app.get("/getMessages", (req, res) => {
+  console.log("[/getMessages]");
   const hash = req.query.hash as string;
   if (hash) {
     console.log(`[GET/getMessages] with hash: ${hash}`);
@@ -169,7 +174,12 @@ app.get("/getMessages", (req, res) => {
           if (row.hash === hash) {
             console.log(`[GET/getMessages] verified hash`);
             getMessages(db, (rows: usesRow[]) => {
-              res.status(200).send(rows);
+              if (!res.headersSent) {
+                console.log("[GET/getMessages] valid res, sending");
+                res.status(200).send(rows);
+              } else {
+                return;
+              }
             });
           }
         });
@@ -179,6 +189,7 @@ app.get("/getMessages", (req, res) => {
 });
 
 app.get("/read", (req, res) => {
+  console.log(["/read"]);
   const hash = req.query.hash as string;
   if (hash) {
     console.log(`[GET/read] with hash: ${hash}`);

@@ -89,6 +89,7 @@ export function getMessages(db: Database, callback: Function) {
     `,
     (err: Error, rows: { message: string }[]) => {
       if (err) {
+        console.error("[getMessages] error retrieving rows");
         console.error(err);
       } else {
         callback(rows);

@@ -50,6 +50,7 @@ function Writer() {
         onChange={handleInputChange}
         onClick={handleInputClick}
         onBlur={handleFocusLoss}
+        maxLength={1024 * 512}
       />
       <button
         className={`submit-button ${buttonActive ? "button-active" : ""}`}
