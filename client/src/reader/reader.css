@@ -7,6 +7,7 @@
   background-color: #373b41;
   color: white;
   font-family: "Inter", sans-serif;
+  font-size: calc(16px + 0.5vw);
   overflow-y: scroll;
 }
 
@@ -22,7 +23,7 @@
   list-style-type: none;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 650px) {
   .message-list {
     width: 95%;
   }
