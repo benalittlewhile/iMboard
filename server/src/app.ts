@@ -4,8 +4,8 @@ import { resourceLimits } from "worker_threads";
 import registerExitHandler from "./lib/conf/exitHandler";
 import initDb, { initBlankDb } from "./lib/conf/initDb";
 import {
-  addMessage,
-  addRow,
+  addMessageRow,
+  addUsesRow,
   findHash,
   getMessages,
   retrieveAllRows,
@@ -25,12 +25,11 @@ process.argv.map((arg) => {
 const app = express();
 app.use(express.json());
 
-const db = initDb();
-// const db = initBlankDb();
+// const db = initDb();
+const db = initBlankDb();
+testInsert(db); // necessary for blank start, else there's no hash to test with
 
 registerExitHandler(db);
-
-// testInsert(db);
 
 app.get("/", (req, res) => {
   // TODO: default page
@@ -87,7 +86,7 @@ app.post("/adminHashAndAdd", (req, res) => {
   } else if (req.query.adminKey === adminKey) {
     const input = req.query.value as string;
     const output = hash(input);
-    addRow(db, output);
+    addUsesRow(db, output);
     res.status(200).json({
       status: "ok",
       hash: output,
@@ -151,7 +150,7 @@ app.post("/write", (req, res) => {
         if (row.hash === hash) {
           console.log(`[POST/write] verified hash`);
           console.log(`[POST/write] got message body: ${req.body.message}`);
-          addMessage(db, req.body.message);
+          addMessageRow(db, req.body.message);
           res.status(200).send();
           return;
         }

@@ -1,21 +1,36 @@
+.message-component > * {
+  /* clear user agent attributes */
+  margin: 0;
+  padding: 0;
+}
+
 .message-component {
   border-color: #465192;
   border-style: solid;
-  border-width: 0.6vw;
+  border-width: 0.5vw;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   border-bottom-left-radius: 8px;
   background-color: #3f4349;
   position: relative;
 
-  padding-top: 4vw;
-  padding-bottom: 1vw;
-  padding-left: 1.5vw;
-  padding-right: 1.5vw;
+  padding-top: 0.33vw;
+  padding-bottom: 0.33vw;
+  /* padding-top: 1.5vh; */
+  /* padding-bottom: 1.5vh; */
+  padding-left: 0.75vw;
+  padding-right: 0.75vw;
 
-  font-size: 2.5vw;
+  text-align: left;
+  font-size: calc(16px+0.5vw);
+
+  white-space: pre-line;
 }
 
 .message-component-wrapper {
   position: relative;
+}
+
+.message-body {
+  min-height: 10vh;
 }

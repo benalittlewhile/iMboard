@@ -40,7 +40,7 @@ function Reader() {
 
   return (
     <div className="reader-wrapper">
-      <h1>See what others have left</h1>
+      <h1 className="header-txt">See what others have left</h1>
       <ul className="message-list">
         {messages.map((thisMessage: message) => (
           <div className="message-list-item">

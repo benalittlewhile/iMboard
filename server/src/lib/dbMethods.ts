@@ -7,12 +7,13 @@ I really don't know if I should have a set of insert methods to add the-
 nah, I'll do this on digital ocean, can just ssh in and update a json
 list of the things whenever I need
 */
-export function addRow(db: Database, input: string) {
+export function addUsesRow(db: Database, input: string) {
   db.run(
     `
       INSERT INTO uses('hash', 'has_read', 'has_written')
-      VALUES('${input}', 0, 0);
+      VALUES(?, 0, 0);
     `,
+    [input],
     (err) => {
       if (err) {
         console.log("error in testRecords query 1");
@@ -64,12 +65,13 @@ export function findHash(db: Database, hash: string, callback: Function) {
   );
 }
 
-export function addMessage(db: Database, message: string) {
+export function addMessageRow(db: Database, message: string) {
   db.run(
     `
       INSERT INTO messages('body')
-      VALUES('${message}');
+      VALUES(?);
     `,
+    [message],
     (err) => {
       if (err) {
         console.error(`[POST/write addm] error adding message to db`);

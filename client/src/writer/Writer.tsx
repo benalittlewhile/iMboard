@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import "./writer.css";
 
 function Writer() {
-  const initialText = "What would you like to leave behind?";
+  const initialText =
+    "\t\tYou found a secret!\r\n-That qr code is one of several scattered about. \r\n-It will work only once, letting you leave one message. You can share a thought you had recently, a story, anything you like.\r\n-After writing your message you can read messages other people have left from other qr codes like it.\r\n\tWhat would you like to say?";
   const [searchParams, setSearchParams] = useSearchParams();
   const hash = searchParams.get("hash");
   let navigate = useNavigate();
