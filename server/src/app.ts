@@ -81,9 +81,10 @@ adminHashAndAdd
   hash: the hashed value, so I can add it
 */
 app.post("/adminHashAndAdd", (req, res) => {
-  console.log("[POST/adminHashAndAdd]");
   if (req.query.adminKey !== adminKey) {
+    console.log("[POST/adminHashAndAdd] invalid key, rejecting");
     res.status(404).send(`Invalid request`);
+    return;
   } else if (req.query.adminKey === adminKey) {
     const input = req.query.value as string;
     const output = hash(input);
@@ -105,14 +106,41 @@ adminRetrieve
     - is there a db function to get this?
     a: haha not a good one
 */
-app.get("/adminRetrieve", (req, res) => {
-  console.log("[GET/adminRetrieve]");
+app.get("/adminRetrieveHashes", (req, res) => {
   if (req.query.adminKey !== adminKey) {
+    console.log("[GET/adminRetrieveHashes] invalid key, rejecting");
     res.status(404).send(`Invalid request`);
+    return;
   } else if (req.query.adminKey === adminKey) {
     retrieveAllRows(db, (rows: usesRow[]) => {
-      console.log(`retrieved rows: ${JSON.stringify(rows)}`);
+      console.log(
+        `[GET/adminRetrieveHashes] valid key, sending retrieved rows`
+      );
       res.status(200).json(rows);
+    });
+  }
+});
+
+/*
+adminRetrieveMessages
+GET
+@params:
+  adminkey
+return:
+  same as GET/read
+*/
+app.get("/adminRetrieveMessages", (req, res) => {
+  if (req.query.adminKey !== adminKey) {
+    console.log(["[GET/adminRetrieveMessages] invalid key, rejecting"]);
+    res.status(404).send(`Invalid request`);
+  } else if (req.query.adminKey === adminKey) {
+    getMessages(db, (rows: usesRow[]) => {
+      if (!res.headersSent) {
+        console.log("[GET/adminRetrieveMessages] valid key, sending");
+        res.status(200).send(rows);
+      } else {
+        return;
+      }
     });
   }
 });
@@ -156,7 +184,11 @@ app.get("/write", (req, res) => {
 });
 
 app.post("/write", (req, res) => {
-  console.log("[POST/write]");
+  if (!req.query.hash) {
+    res.send("not for you");
+    console.log("[POST/write] no hash given, rejecting");
+    return;
+  }
   const hash = req.query.hash as string;
   if (hash) {
     console.log(`[POST/write] with hash: ${hash}`);
