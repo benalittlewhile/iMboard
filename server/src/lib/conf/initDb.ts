@@ -25,10 +25,10 @@ export default function initDb() {
       `,
       (err) => {
         if (err) {
-          console.log("Error creating table uses");
+          console.log("Error loading/creating table uses");
           console.error(err);
         } else {
-          console.log("Created table uses");
+          console.log("Loaded/created table uses");
         }
       }
     );
@@ -43,10 +43,10 @@ export default function initDb() {
       `,
       (err) => {
         if (err) {
-          console.log("Error creating table messages");
+          console.log("Error loading/creating table messages");
           console.error(err);
         } else {
-          console.log("Created table messages");
+          console.log("Loaded/created table messages");
         }
       }
     );

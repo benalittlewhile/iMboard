@@ -6,6 +6,7 @@ import initDb, { initBlankDb } from "./lib/conf/initDb";
 import {
   addMessageRow,
   addUsesRow,
+  deleteMessageById,
   findHash,
   getMessages,
   retrieveAllRows,
@@ -25,9 +26,9 @@ process.argv.map((arg) => {
 const app = express();
 app.use(express.json());
 
-// const db = initDb();
-const db = initBlankDb();
-testInsert(db); // necessary for blank start, else there's no hash to test with
+const db = initDb();
+// const db = initBlankDb();
+// testInsert(db); // necessary for blank start, else there's no hash to test with
 
 registerExitHandler(db);
 
@@ -112,6 +113,21 @@ app.get("/adminRetrieve", (req, res) => {
     retrieveAllRows(db, (rows: usesRow[]) => {
       console.log(`retrieved rows: ${JSON.stringify(rows)}`);
       res.status(200).json(rows);
+    });
+  }
+});
+
+app.post("/adminDeleteMessageById", (req, res) => {
+  if (req.query.adminKey !== adminKey) {
+    res.status(404).send(`Invalid request`);
+  } else if (req.query.adminKey === adminKey) {
+    console.log(
+      `[POST/adminDeleteById] key verified, attempting to delete message with id ${req.query.id}`
+    );
+    const id = Number(req.query.id);
+    deleteMessageById(db, id);
+    res.status(200).json({
+      status: "ok",
     });
   }
 });

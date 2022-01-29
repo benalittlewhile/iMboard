@@ -52,8 +52,9 @@ export function retrieveAllRows(db: Database, callback: Function) {
 export function findHash(db: Database, hash: string, callback: Function) {
   db.all(
     `
-      SELECT * FROM uses WHERE hash = '${hash}';
+      SELECT * FROM uses WHERE hash = ?;
     `,
+    [hash],
     (err: Error, result: usesRow[]) => {
       if (err) {
         console.error("Error in findHash");
@@ -96,6 +97,18 @@ export function getMessages(db: Database, callback: Function) {
       } else {
         callback(rows);
       }
+    }
+  );
+}
+
+export function deleteMessageById(db: Database, id: number) {
+  db.each(
+    `
+      DELETE FROM messages WHERE id=?
+    `,
+    [id],
+    () => {
+      console.log(`[deleteMessagesById] Deleted message with id ${id}`);
     }
   );
 }

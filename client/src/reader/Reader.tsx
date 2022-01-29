@@ -21,7 +21,6 @@ function Reader() {
     const base = window.location.href;
     const parts = base.split("read");
     const dest = parts[0] + "getMessages" + parts[1];
-    console.log(`generated dest ${dest}`);
     return dest;
   }
 
@@ -32,9 +31,7 @@ function Reader() {
   }
 
   async function updateMessages() {
-    console.log("updatemessages");
     const messages = await fetchMessages();
-    console.log(`fetched messages ${JSON.stringify(messages)}`);
     setMessages(messages);
   }
 
