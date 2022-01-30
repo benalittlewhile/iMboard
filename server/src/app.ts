@@ -1,8 +1,8 @@
 import express from "express";
 import path from "path";
-import { resourceLimits } from "worker_threads";
+import https from "https";
 import registerExitHandler from "./lib/conf/exitHandler";
-import initDb, { initBlankDb } from "./lib/conf/initDb";
+import initDb from "./lib/conf/initDb";
 import {
   addMessageRow,
   addUsesRow,
@@ -11,9 +11,9 @@ import {
   getMessages,
   retrieveAllRows,
 } from "./lib/dbMethods";
-import { testInsert } from "./lib/demo/dbTest";
 import { hash } from "./lib/hash";
 import { usesRow } from "./lib/types";
+import * as fs from "fs";
 
 let adminKey: string;
 
@@ -286,6 +286,14 @@ app.get("/:id", (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("server listening on 3000");
-});
+https
+  .createServer(
+    {
+      cert: fs.readFileSync("/etc/letsencrypt/live/imboard.one/fullchain.pem"),
+      key: fs.readFileSync("/etc/letsencrypt/live/imboard.one/privkey.pem"),
+    },
+    app
+  )
+  .listen(80, () => {
+    console.log("server listening on 80");
+  });
