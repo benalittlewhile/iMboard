@@ -7,7 +7,9 @@
   "license": "MIT",
   "scripts": {
     "fullstart": "nodemon --watch client/src --watch server/src -e ts,json,tsx,css --exec \"clear && yarn --cwd client deploy && yarn --cwd server dorun\"",
-    "hash": "yarn --cwd server hash"
+    "hash": "yarn --cwd server hash",
+    "build": "yarn --cwd client deploy && yarn --cwd server build",
+    "start": "node server/build/app.js adminKey=$ADMINKEY"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
