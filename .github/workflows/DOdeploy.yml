@@ -21,9 +21,9 @@ jobs:
       - name: SSH Remote Commands
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{secrets.SSH_HOST_IP}}
-          key: ${{secrets.SSH_KEY}}
-          username: ${{secrets.SSH_USER}}
+          host: ${{ secrets.SSH_HOST_IP }}
+          key: ${{ secrets.SSH_KEY }}
+          username: ${{ secrets.SSH_USER }}
 
           script: |
             cd ~/iMboard
