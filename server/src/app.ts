@@ -16,13 +16,12 @@ import {
 import { hash } from "./lib/hash";
 import { usesRow } from "./lib/types";
 import * as fs from "fs";
-import { exit } from "process";
 
 let adminKey = process.env.ADMINKEY;
 
 if (!adminKey || adminKey == "") {
   console.error("Adminkey unset, exiting");
-  exit();
+  process.exit();
 }
 
 const app = express();
@@ -31,7 +30,7 @@ app.use(express.json());
 const db = initDb();
 // const db = initBlankDb();
 // necessary for blank start, else there's no hash to test with
-// testInsert(db); 
+// testInsert(db);
 
 registerExitHandler(db);
 
@@ -167,7 +166,8 @@ app.get("/write", (req, res) => {
   console.log("[GET/write]");
   const hash = req.query.hash as string;
   if (hash) {
-    console.log(`[GET/write] with hash: ${hash}`);
+    const shortHash = hash.slice(undefined, 8) + "...";
+    console.log(`[GET/write] with hash: ${shortHash}`);
     findHash(db, hash, (result: usesRow[]) => {
       if (result.length != 0) {
         result.map((row: usesRow) => {
@@ -203,7 +203,8 @@ app.post("/write", (req, res) => {
   }
   const hash = req.query.hash as string;
   if (hash) {
-    console.log(`[POST/write] with hash: ${hash}`);
+    const shortHash = hash.slice(undefined, 8) + "...";
+    console.log(`[POST/write] with hash: ${shortHash}`);
     findHash(db, hash, (result: usesRow[]) => {
       if (result.length != 0) {
         const row = result[0];
@@ -226,7 +227,7 @@ app.post("/write", (req, res) => {
           }
         }
       } else {
-        console.log("[POST/write] rejected hash");
+        console.log(`[POST/write] rejected hash`);
         res.status(404).send("Invalid request");
       }
     });
@@ -237,7 +238,8 @@ app.get("/getMessages", (req, res) => {
   console.log("[/getMessages]");
   const hash = req.query.hash as string;
   if (hash) {
-    console.log(`[GET/getMessages] with hash: ${hash}`);
+    const shortHash = hash.slice(undefined, 8) + "...";
+    console.log(`[GET/getMessages] with hash: ${shortHash}`);
     findHash(db, hash, (result: usesRow[]) => {
       if (result.length != 0) {
         result.map((row: usesRow) => {
@@ -274,7 +276,8 @@ app.get("/read", (req, res) => {
   console.log(["/read"]);
   const hash = req.query.hash as string;
   if (hash) {
-    console.log(`[GET/read] with hash: ${hash}`);
+    const shortHash = hash.slice(undefined, 8) + "...";
+    console.log(`[GET/read] with hash: ${shortHash}`);
     findHash(db, hash, (result: usesRow[]) => {
       if (result.length != 0) {
         result.map((row: usesRow) => {
@@ -313,17 +316,20 @@ app.get("/read", (req, res) => {
   if hash is not valid, either bounce to the error/home page or deny the request
 */
 app.get("/:id", (req, res) => {
-  console.log("wildcard messed you up again");
+  const hash = req.query.hash as string;
+  if (!hash || hash == "") {
+    res.send("not for you");
+  }
+  const shortHash = hash.slice(undefined, 8) + "...";
+  console.log(`[GET/id] hit from hash ${shortHash}`);
   findHash(db, req.params.id, (result: usesRow[]) => {
     if (result.length > 0) {
+      console.log(`[GET/id] hash found, redirecting`);
       res.status(200).redirect(`/write?hash=${req.params.id}`);
     } else {
+      console.log(`[GET/id] rejecting hash`);
       res.send("not for you");
     }
-    // if (validIds.includes(Number(req.params.id))) {
-    // } else {
-    //   res.send("not for you");
-    // }
   });
 });
 
