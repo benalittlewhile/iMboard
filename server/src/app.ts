@@ -9,6 +9,8 @@ import {
   deleteMessageById,
   findHash,
   getMessages,
+  markHasRead,
+  markHasWritten,
   retrieveAllRows,
 } from "./lib/dbMethods";
 import { hash } from "./lib/hash";
@@ -170,16 +172,25 @@ app.get("/write", (req, res) => {
         result.map((row: usesRow) => {
           if (row.hash === hash) {
             console.log(`[GET/write] verified hash`);
-            res
-              .status(200)
-              .sendFile(path.join(__dirname, "public", "index.html"));
+            if (row.has_written == false) {
+              console.log(`[GET/write] hash has not written, sending`);
+              res
+                .status(200)
+                .sendFile(path.join(__dirname, "public", "index.html"));
+              return;
+            } else {
+              console.log(`[GET/write] hash has already written, rejecting`);
+              res.status(404).send("Invalid request");
+            }
           }
         });
       } else {
-        console.log("[GET/write] rejected hash");
+        console.log(`[GET/write] invalid hash, rejecting`);
         res.status(404).send("Invalid request");
       }
     });
+  } else {
+    res.status(404).send("Invalid request");
   }
 });
 
@@ -197,10 +208,21 @@ app.post("/write", (req, res) => {
         const row = result[0];
         if (row.hash === hash) {
           console.log(`[POST/write] verified hash`);
-          console.log(`[POST/write] got message body: ${req.body.message}`);
-          addMessageRow(db, req.body.message);
-          res.status(200).send();
-          return;
+          if (row.has_written == false) {
+            console.log(
+              `[POST/write] hash has not written, setting and sending`
+            );
+            console.log(`[POST/write] got message body: ${req.body.message}`);
+            addMessageRow(db, req.body.message);
+            markHasWritten(db, hash);
+            res.status(200).send();
+            return;
+          } else {
+            console.log(
+              `[GET/getMessages] hash has already written, rejecting`
+            );
+            res.status(404).send("Invalid request");
+          }
         }
       } else {
         console.log("[POST/write] rejected hash");
@@ -220,14 +242,26 @@ app.get("/getMessages", (req, res) => {
         result.map((row: usesRow) => {
           if (row.hash === hash) {
             console.log(`[GET/getMessages] verified hash`);
-            getMessages(db, (rows: usesRow[]) => {
-              if (!res.headersSent) {
-                console.log("[GET/getMessages] valid res, sending");
-                res.status(200).send(rows);
-              } else {
-                return;
-              }
-            });
+            if (row.has_read == false) {
+              console.log(
+                `[GET/getMessages] hash has not read, setting and sending`
+              );
+              markHasRead(db, hash);
+              getMessages(db, (rows: usesRow[]) => {
+                if (!res.headersSent) {
+                  console.log("[GET/getMessages] valid res, sending");
+                  res.status(200).send(rows);
+                } else {
+                  return;
+                }
+              });
+            } else {
+              console.log(`[GET/getMessages] hash has already read, rejecting`);
+              res.status(404).send("Invalid request");
+            }
+          } else {
+            console.log(`[GET/getMessages] hash invalid, rejecting`);
+            res.status(404).send("Invalid request");
           }
         });
       }
@@ -245,14 +279,20 @@ app.get("/read", (req, res) => {
         result.map((row: usesRow) => {
           if (row.hash === hash) {
             console.log(`[GET/read] verified hash`);
-            res
-              .status(200)
-              .sendFile(path.join(__dirname, "public", "index.html"));
+            if (row.has_read == false) {
+              console.log(`[GET/read] hash has not read sending`);
+              res
+                .status(200)
+                .sendFile(path.join(__dirname, "public", "index.html"));
+            } else {
+              console.log(`[GET/read] hash has already read, rejecting`);
+              res.status(404).send("Invalid request");
+            }
+          } else {
+            console.log(`[GET/read] hash invalid, rejecting`);
+            res.status(404).send("Invalid request");
           }
         });
-      } else {
-        console.log("[GET/read] rejected hash");
-        res.status(404).send("Invalid request");
       }
     });
   }

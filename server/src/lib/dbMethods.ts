@@ -2,11 +2,6 @@ import { Database } from "sqlite3";
 import { isBuffer } from "util";
 import { usesRow } from "./types";
 
-/*
-I really don't know if I should have a set of insert methods to add the-
-nah, I'll do this on digital ocean, can just ssh in and update a json
-list of the things whenever I need
-*/
 export function addUsesRow(db: Database, input: string) {
   db.run(
     `
@@ -20,6 +15,54 @@ export function addUsesRow(db: Database, input: string) {
         console.error(err?.message);
       } else {
         console.log(`added ${input} to hash list`);
+      }
+    }
+  );
+}
+
+export function markHasRead(db: Database, hash: string) {
+  db.run(
+    `
+    UPDATE uses
+    SET has_read = 1
+    WHERE hash=?
+    `,
+    [hash],
+    (err) => {
+      if (err) {
+        console.error(`error setting has_read for hash ${hash}`);
+        console.error(err);
+      } else {
+        console.log(
+          `[db/markHasRead] set has_read for hash ${hash.slice(
+            undefined,
+            8
+          )}...`
+        );
+      }
+    }
+  );
+}
+
+export function markHasWritten(db: Database, hash: string) {
+  db.run(
+    `
+    UPDATE uses
+    SET has_written = 1
+    WHERE hash=?
+    `,
+    [hash],
+    (err) => {
+      if (err) {
+        console.error(`error setting has_written for hash ${hash}`);
+        console.error(err);
+      } else {
+        console.log(
+          `[db/markHasWritten] set has_written for hash ${hash.slice(
+            undefined,
+            8
+          )}...`
+        );
       }
     }
   );
