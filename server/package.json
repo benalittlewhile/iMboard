@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon --ignore build/ -e ts,json --exec \"tsc && tsc-alias --silent && node build/app.js\"",
     "build": "tsc && tsc-alias",
-    "dorun": "tsc && tsc-alias && node build/app.js adminKey=$ADMINKEY",
+    "dorun": "tsc && tsc-alias && node build/app.js",
     "hash": "tsc && tsc-alias && node build/app.js hash"
   },
   "dependencies": {

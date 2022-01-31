@@ -16,21 +16,22 @@ import {
 import { hash } from "./lib/hash";
 import { usesRow } from "./lib/types";
 import * as fs from "fs";
+import { exit } from "process";
 
-let adminKey: string;
+let adminKey = process.env.ADMINKEY;
 
-process.argv.map((arg) => {
-  if (arg.includes("adminKey")) {
-    adminKey = arg.split("adminKey=")[1];
-  }
-});
+if (!adminKey || adminKey == "") {
+  console.error("Adminkey unset, exiting");
+  exit();
+}
 
 const app = express();
 app.use(express.json());
 
 const db = initDb();
 // const db = initBlankDb();
-// testInsert(db); // necessary for blank start, else there's no hash to test with
+// necessary for blank start, else there's no hash to test with
+// testInsert(db); 
 
 registerExitHandler(db);
 
