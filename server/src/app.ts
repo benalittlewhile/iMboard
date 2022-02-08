@@ -35,39 +35,11 @@ const db = initDb();
 registerExitHandler(db);
 
 app.get("/", (req, res) => {
-  // TODO: default page
+  // TODO (maybe): default page
   res.send("not for you");
 });
 
 // routes
-
-/*
-writeMessage:
-@methods: POST
-@params:
-  hash:
-    string 
-    same unique id
-@returns
-response code
-  good if the hash is valid and the db call worked (then client moves on to the
-  message list via redirect
-  bad if the hash is invalid or the db call fails
-
-*/
-
-/*
-getMessages:
-@methods: GET
-@params: 
-  hash:
-    string
-  only usable once, so before responding this route needs to mark the hash as 
-  used in the database
-@returns:
-  if the hash is valid, return a json list of all the messages in the db
-  if the hash is invalid, super don't do that
-*/
 
 app.use(express.static(path.join(__dirname, "/public")));
 
@@ -83,7 +55,7 @@ adminHashAndAdd
   hash: the hashed value, so I can add it
 */
 app.post("/adminHashAndAdd", (req, res) => {
-  if (req.query.adminKey !== adminKey) {
+  if (!req.query.adminKey || req.query.adminKey !== adminKey) {
     console.log("[POST/adminHashAndAdd] invalid key, rejecting");
     res.status(404).send(`Invalid request`);
     return;
@@ -109,7 +81,7 @@ adminRetrieve
     a: haha not a good one
 */
 app.get("/adminRetrieveHashes", (req, res) => {
-  if (req.query.adminKey !== adminKey) {
+  if (!req.query.adminKey || req.query.adminKey !== adminKey) {
     console.log("[GET/adminRetrieveHashes] invalid key, rejecting");
     res.status(404).send(`Invalid request`);
     return;
@@ -132,7 +104,7 @@ return:
   same as GET/read
 */
 app.get("/adminRetrieveMessages", (req, res) => {
-  if (req.query.adminKey !== adminKey) {
+  if (!req.query.adminKey || req.query.adminKey !== adminKey) {
     console.log(["[GET/adminRetrieveMessages] invalid key, rejecting"]);
     res.status(404).send(`Invalid request`);
   } else if (req.query.adminKey === adminKey) {
@@ -148,7 +120,8 @@ app.get("/adminRetrieveMessages", (req, res) => {
 });
 
 app.post("/adminDeleteMessageById", (req, res) => {
-  if (req.query.adminKey !== adminKey) {
+  if (!req.query.adminKey || req.query.adminKey !== adminKey) {
+    console.log(`[POST/adminDeleteMessageById] no key given, rejecting`);
     res.status(404).send(`Invalid request`);
   } else if (req.query.adminKey === adminKey) {
     console.log(
@@ -163,38 +136,52 @@ app.post("/adminDeleteMessageById", (req, res) => {
 });
 
 app.get("/write", (req, res) => {
-  console.log("[GET/write]");
-  const hash = req.query.hash as string;
-  if (hash) {
-    const shortHash = hash.slice(undefined, 8) + "...";
-    console.log(`[GET/write] with hash: ${shortHash}`);
-    findHash(db, hash, (result: usesRow[]) => {
-      if (result.length != 0) {
-        result.map((row: usesRow) => {
-          if (row.hash === hash) {
-            console.log(`[GET/write] verified hash`);
-            if (row.has_written == false) {
-              console.log(`[GET/write] hash has not written, sending`);
-              res
-                .status(200)
-                .sendFile(path.join(__dirname, "public", "index.html"));
-              return;
-            } else {
-              console.log(`[GET/write] hash has already written, rejecting`);
-              res.status(404).send("Invalid request");
-            }
-          }
-        });
-      } else {
-        console.log(`[GET/write] invalid hash, rejecting`);
-        res.status(404).send("Invalid request");
-      }
-    });
-  } else {
-    res.status(404).send("Invalid request");
+  if (!req.query.hash) {
+    res.send("not for you");
+    console.log(`[GET/write] no hash given, rejecting`);
+    return;
   }
+  const hash = req.query.hash as string;
+  const shortHash = hash.slice(undefined, 8) + "...";
+  console.log(`[GET/write] with hash: ${shortHash}`);
+  findHash(db, hash, (result: usesRow[]) => {
+    if (result.length != 0) {
+      result.map((row: usesRow) => {
+        if (row.hash === hash) {
+          console.log(`[GET/write] verified hash`);
+          if (row.has_written == false) {
+            console.log(`[GET/write] hash has not written, sending`);
+            res
+              .status(200)
+              .sendFile(path.join(__dirname, "public", "index.html"));
+            return;
+          } else {
+            console.log(`[GET/write] hash has already written, rejecting`);
+            res.status(404).send("Invalid request");
+          }
+        }
+      });
+    } else {
+      console.log(`[GET/write] invalid hash, rejecting`);
+      res.status(404).send("Invalid request");
+    }
+  });
 });
 
+/*
+Write:
+@methods: POST
+@params:
+  hash:
+    string 
+    same unique id
+@returns
+response code
+  good if the hash is valid and the db call worked (then client moves on to the
+  message list via redirect
+  bad if the hash is invalid or the db call fails
+
+*/
 app.post("/write", (req, res) => {
   if (!req.query.hash) {
     res.send("not for you");
@@ -234,72 +221,88 @@ app.post("/write", (req, res) => {
   }
 });
 
+/*
+getMessages:
+@methods: GET
+@params: 
+  hash:
+    string
+  only usable once, so before responding this route needs to mark the hash as 
+  used in the database
+@returns:
+  if the hash is valid, return a json list of all the messages in the db
+  if the hash is invalid, super don't do that
+*/
 app.get("/getMessages", (req, res) => {
-  console.log("[/getMessages]");
+  if (!req.query.hash) {
+    res.send("not for you");
+    console.log(`[GET/write] no hash given, rejecting`);
+    return;
+  }
   const hash = req.query.hash as string;
-  if (hash) {
-    const shortHash = hash.slice(undefined, 8) + "...";
-    console.log(`[GET/getMessages] with hash: ${shortHash}`);
-    findHash(db, hash, (result: usesRow[]) => {
-      if (result.length != 0) {
-        result.map((row: usesRow) => {
-          if (row.hash === hash) {
-            console.log(`[GET/getMessages] verified hash`);
-            if (row.has_read == false) {
-              console.log(
-                `[GET/getMessages] hash has not read, setting and sending`
-              );
-              markHasRead(db, hash);
-              getMessages(db, (rows: usesRow[]) => {
-                if (!res.headersSent) {
-                  console.log("[GET/getMessages] valid res, sending");
-                  res.status(200).send(rows);
-                } else {
-                  return;
-                }
-              });
-            } else {
-              console.log(`[GET/getMessages] hash has already read, rejecting`);
-              res.status(404).send("Invalid request");
-            }
+  const shortHash = hash.slice(undefined, 8) + "...";
+  console.log(`[GET/getMessages] with hash: ${shortHash}`);
+  findHash(db, hash, (result: usesRow[]) => {
+    if (result.length != 0) {
+      result.map((row: usesRow) => {
+        if (row.hash === hash) {
+          console.log(`[GET/getMessages] verified hash`);
+          if (row.has_read == false) {
+            console.log(
+              `[GET/getMessages] hash has not read, setting and sending`
+            );
+            markHasRead(db, hash);
+            getMessages(db, (rows: usesRow[]) => {
+              if (!res.headersSent) {
+                console.log("[GET/getMessages] valid res, sending");
+                res.status(200).send(rows);
+              } else {
+                return;
+              }
+            });
           } else {
-            console.log(`[GET/getMessages] hash invalid, rejecting`);
+            console.log(`[GET/getMessages] hash has already read, rejecting`);
             res.status(404).send("Invalid request");
           }
-        });
-      }
-    });
-  }
+        } else {
+          console.log(`[GET/getMessages] hash invalid, rejecting`);
+          res.status(404).send("Invalid request");
+        }
+      });
+    }
+  });
 });
 
 app.get("/read", (req, res) => {
-  console.log(["/read"]);
+  if (!req.query.hash) {
+    res.send("not for you");
+    console.log(`[GET/write] no hash given, rejecting`);
+    return;
+  }
   const hash = req.query.hash as string;
-  if (hash) {
-    const shortHash = hash.slice(undefined, 8) + "...";
-    console.log(`[GET/read] with hash: ${shortHash}`);
-    findHash(db, hash, (result: usesRow[]) => {
-      if (result.length != 0) {
-        result.map((row: usesRow) => {
-          if (row.hash === hash) {
-            console.log(`[GET/read] verified hash`);
-            if (row.has_read == false) {
-              console.log(`[GET/read] hash has not read sending`);
-              res
-                .status(200)
-                .sendFile(path.join(__dirname, "public", "index.html"));
-            } else {
-              console.log(`[GET/read] hash has already read, rejecting`);
-              res.status(404).send("Invalid request");
-            }
+  const shortHash = hash.slice(undefined, 8) + "...";
+  console.log(`[GET/read] with hash: ${shortHash}`);
+  findHash(db, hash, (result: usesRow[]) => {
+    if (result.length != 0) {
+      result.map((row: usesRow) => {
+        if (row.hash === hash) {
+          console.log(`[GET/read] verified hash`);
+          if (row.has_read == false) {
+            console.log(`[GET/read] hash has not read sending`);
+            res
+              .status(200)
+              .sendFile(path.join(__dirname, "public", "index.html"));
           } else {
-            console.log(`[GET/read] hash invalid, rejecting`);
+            console.log(`[GET/read] hash has already read, rejecting`);
             res.status(404).send("Invalid request");
           }
-        });
-      }
-    });
-  }
+        } else {
+          console.log(`[GET/read] hash invalid, rejecting`);
+          res.status(404).send("Invalid request");
+        }
+      });
+    }
+  });
 });
 
 /*
@@ -316,10 +319,12 @@ app.get("/read", (req, res) => {
   if hash is not valid, either bounce to the error/home page or deny the request
 */
 app.get("/:id", (req, res) => {
-  const hash = req.query.hash as string;
-  if (!hash || hash == "") {
-    res.send("not for you");
+  if (!req.query.hash) {
+    res.status(404).send("not for you");
+    console.log("[GET/:id] no hash given, rejecting");
+    return;
   }
+  const hash = req.query.hash as string;
   const shortHash = hash.slice(undefined, 8) + "...";
   console.log(`[GET/id] hit from hash ${shortHash}`);
   findHash(db, req.params.id, (result: usesRow[]) => {
@@ -328,7 +333,7 @@ app.get("/:id", (req, res) => {
       res.status(200).redirect(`/write?hash=${req.params.id}`);
     } else {
       console.log(`[GET/id] rejecting hash`);
-      res.send("not for you");
+      res.send("Not for you");
     }
   });
 });
